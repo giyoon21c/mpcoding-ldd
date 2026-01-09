@@ -42,17 +42,17 @@
 * copy_to_user, copy_from_user
 * Using file->private_data
 
-### 8. [IOCTL Implementation](/08_ioctl/)
+### [8. IOCTL Implementation](/08_ioctl/)
 * Defining IOCTL commands
 * Handling IOCTL in driver
 * User application examples
 
-### 9. [Memory Allocation Mechanisms](/09_memory_alloc/)
+### [9. Memory Allocation Mechanisms](/09_memory_alloc/)
 * kmalloc, kzalloc, vmalloc
 * GFP flags
 * Slab allocator overview
 
-### 10. Kernel Linked Lists
+### [10. Kernel Linked Lists](/10_linked_list/)
 * list_head, iterating, adding, deleting
 * Using linked lists in drivers
 

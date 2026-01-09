@@ -1,3 +1,7 @@
+## Linux Kernel Memory
+### Video :
+[![Youtube Video](https://img.youtube.com/vi/EOFFbRfHxlQ/0.jpg)](https://www.youtube.com/watch?v=EOFFbRfHxlQ)
+
 # 1. Virtual Memory
 
 Early computers had very limited and expensive RAM.
@@ -468,7 +472,7 @@ In Linux, almost all small kernel allocations ultimately come from SLUB-backed c
 
 ### Reference links
 * https://youtu.be/qcBIvnQt0Bw
-* https://www.geeksforgeeks.org/operating-systems/virtual-memory-in-operating-system/?utm_source=chatgpt.com
+* https://www.geeksforgeeks.org/operating-systems/virtual-memory-in-operating-system
 * https://www.kernel.org/doc/gorman/html/understand/understand011.html
 * https://lkp.pierreolivier.eu/slides/17_MemoryManagement.pdf
 * https://ruffell.nz/programming/writeups/2019/02/15/looking-at-kmalloc-and-the-slub-memory-allocator.html
