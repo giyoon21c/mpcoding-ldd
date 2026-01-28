@@ -73,7 +73,7 @@
 
 ## SECTION 4 — I2C & SPI Drivers
 
-### 14. I2C Subsystem Basics
+### [14. I2C Subsystem Basics](/14_i2c_subsystem_basics/)
 * Linux I2C architecture
 * Client vs adapter vs driver
 * Registering an I2C driver
@@ -151,7 +151,7 @@
 * Custom compatible string
 * Passing configuration via DT
 
-### 28. Platform Driver (Optional but Recommended)
+### 28. Platform Driver 
 * Introduction to platform bus
 * Platform_device vs platform_driver
 * Useful for non-I2C/SPI devices
