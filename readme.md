@@ -85,7 +85,7 @@
 * Temperature & pressure reading
 * Exposing sensor values to user space
 
-### 16. SPI Subsystem Basics
+### [16. SPI Subsystem Basics](/16_spi_subsytem_basics/)
 * SPI architecture
 * Full duplex transfers
 * SPI message & transfer structs
