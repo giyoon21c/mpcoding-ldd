@@ -1,6 +1,10 @@
 
 # Kernel Thread
 
+### Video :-
+
+[![Youtube Video](https://img.youtube.com/vi/BBMvdqaV2F8/0.jpg)](https://www.youtube.com/watch?v=BBMvdqaV2F8)
+
 
 ## 1. What is a Process?
 

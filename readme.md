@@ -92,7 +92,7 @@
 
 ## SECTION 5 — Concurrency & Synchronization
 
-### 17. Kernel Threads (kthread)
+### [17. Kernel Threads (kthread)](/17_kernel_threads/)
 * Creating, running, stopping threads
 * Thread loop best practices
 
