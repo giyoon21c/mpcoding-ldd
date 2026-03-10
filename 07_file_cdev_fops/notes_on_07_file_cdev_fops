@@ -356,9 +356,50 @@ int main() {
 ==
 date:
 3.7.2026
+3.10.2026
 
 topic:
 Linux Device Driver Private Data Field : Linux Device Driver Development with Raspberry Pi 08
 
 
+* connect
+
+ssh dumble@192.168.86.226
+
+
+* make 
+dumble@raspberrypi:~/git/mpcoding-ldd/07_file_cdev_fops/02_private_data $ sudo insmod my_cdev.ko
+dumble@raspberrypi:~/git/mpcoding-ldd/07_file_cdev_fops/02_private_data $ 
+
+
+* sudo insmod my_cdev.ko 
+
+
+* dmesg -W
+[ 2350.876183] my_cdev: Caracter device registerd, Major number: 236 Minor number: 0
+[ 2350.876202] my_cdev: Created device number under /sys/class/my_class
+[ 2350.876207] my_cdev: Created new device node /dev/my_cdev
+
+
+dumble@raspberrypi:~/git/mpcoding-ldd/07_file_cdev_fops/02_private_data $ ls /dev/my_cdev0 -l
+crw------- 1 root root 236, 0 Mar 10 08:05 /dev/my_cdev0
+
+
+dumble@raspberrypi:~/git/mpcoding-ldd/07_file_cdev_fops/02_private_data $ sudo ./a.out /dev/my_cdev0 "Hello Dumble"
+/dev/my_cdev0: file opend 0
+Written length: 12 
+Press enter to continue.
+
+[ 2448.683644] my_cdev: my_open called, Major: 236 Minor: 0
+[ 2448.683683] my_cdev: Allocated 64 bytes for private data
+[ 2448.684590] my_cdev: write request=12, will copy=12
+[ 2448.684617] my_cdev: write done: copied=12
+
+read: 12 bytes - Hello Dumble 
+/dev/my_cdev0: file closed 0
+
+[ 2487.765999] my_cdev: read called: request=64, 
+[ 2487.766023] my_cdev: Read will copy=12 bytes
+[ 2487.766027] my_cdev: Read done: return=12
+[ 2487.766065] my_cdev: my_release called, freed 64 bytes and file is closed
 

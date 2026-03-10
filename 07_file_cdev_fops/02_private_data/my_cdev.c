@@ -21,31 +21,42 @@ static struct class *my_class;
 static struct mutex dev_mutex;
 
 static int my_open(struct inode *pInode, struct file *pFile){
-    pr_info("%s: my_open called, Major: %d Minor: %d\n", my_device, imajor(pInode), iminor(pInode));
+    pr_info("%s: my_open called, Major: %d Minor: %d\n", 
+        my_device, imajor(pInode), iminor(pInode));
 
+    // per file, private buffer, not global one
+    // kzalloc - allocate and initialize to zeroes
     char *buffer = kzalloc(DEV_BUFFER_SIZE, GFP_KERNEL);
     if(!buffer)
         return -ENOMEM;
 
     pFile->private_data = buffer;
 
-    pr_info("%s: Allocated %d bytes for private data\n", my_device, DEV_BUFFER_SIZE);
+    pr_info("%s: Allocated %d bytes for private data\n", 
+        my_device, DEV_BUFFER_SIZE);
 
     return 0;
 }
+
 static int my_release(struct inode *pInode, struct file *pFile){
 
     char *buffer = (char *)pFile->private_data;
     if(buffer)
         kfree(buffer);
 
-    pr_info("%s: my_release called, freed %d bytes and file is closed\n", my_device, DEV_BUFFER_SIZE);
+    pr_info("%s: my_release called, freed %d bytes and file is closed\n", 
+        my_device, DEV_BUFFER_SIZE);
     return 0;
 }
 
 /* read: copy data from kernel buffer -> user-space buffer*/
-static	ssize_t my_read(struct file *pFile, char __user *pUser_buff, size_t count, loff_t *pOffset){
-    size_t bytes_to_copy, not_copied, copied;
+static	ssize_t my_read(struct file *pFile, 
+                        char __user *pUser_buff, 
+                        size_t count, 
+                         loff_t *pOffset){
+
+    size_t bytes_to_copy, 
+    not_copied, copied;
 
     char *dev_buffer = (char *)pFile->private_data;
     if(!dev_buffer)
@@ -63,10 +74,9 @@ static	ssize_t my_read(struct file *pFile, char __user *pUser_buff, size_t count
     not_copied = copy_to_user(pUser_buff, dev_buffer, bytes_to_copy);
     copied = bytes_to_copy - not_copied;
 
-    
-
     if(not_copied)
-        pr_warn("%s: copy_to_user only copied %zu/%zu\n", my_device, copied, bytes_to_copy);
+        pr_warn("%s: copy_to_user only copied %zu/%zu\n", 
+            my_device, copied, bytes_to_copy);
 
     pr_info("%s: Read done: return=%zu\n", my_device, copied);
 
@@ -75,7 +85,11 @@ static	ssize_t my_read(struct file *pFile, char __user *pUser_buff, size_t count
 }
 
 /* write: copy data from user-space buffer -> kernel buffer */
-static	ssize_t my_write(struct file *pFile, const char __user *pUser_buff, size_t count, loff_t *pOffset){
+static	ssize_t my_write(struct file *pFile, 
+                         const char __user *pUser_buff, 
+                         size_t count, 
+                         loff_t *pOffset){
+
     size_t bytes_to_copy, not_copied, copied;
 
     char *dev_buffer = (char *)pFile->private_data;
@@ -87,13 +101,15 @@ static	ssize_t my_write(struct file *pFile, const char __user *pUser_buff, size_
     
     bytes_to_copy = count > DEV_BUFFER_SIZE ? DEV_BUFFER_SIZE : count;
 
-    pr_info("%s: write request=%zu, will copy=%zu\n", my_device, count, bytes_to_copy);
+    pr_info("%s: write request=%zu, will copy=%zu\n", 
+        my_device, count, bytes_to_copy);
 
     not_copied = copy_from_user(dev_buffer, pUser_buff, bytes_to_copy);
     copied = bytes_to_copy - not_copied;
 
     if(not_copied){
-        pr_warn("%s: copy_from_user: only copied %zu/%zu\n", my_device, copied, bytes_to_copy);
+        pr_warn("%s: copy_from_user: only copied %zu/%zu\n", 
+            my_device, copied, bytes_to_copy);
     }
 
     pr_info("%s: write done: copied=%zu\n", my_device, copied);
@@ -159,7 +175,6 @@ free_device_nr:
     unregister_chrdev_region(dev_nr, MINORMASK + 1); 
 
     return status;
-
 }
 
 static void __exit my_exit(void){
