@@ -1,0 +1,20 @@
+==
+date:
+3.13.2026
+
+topic:
+11 - gpio control
+
+ref:
+https://youtu.be/wSmjAxeJr34?si=WQ-QS9LvjAA_Y7gB
+
+
+* physical setup
+
+                                      switch
+pin4 (5v) ------- 1.0k ohm -----(left)button(right)-----gpio 20
+pin6 (gnd) -------200 ohm -------(short)LED(long)-------gpio 21
+
+
+
+

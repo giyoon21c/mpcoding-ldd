@@ -1,0 +1,1 @@
+savedcmd_/home/dumble/git/mpcoding-ldd/08_ioctl/Module.symvers :=  scripts/mod/modpost -M -m -a      -o /home/dumble/git/mpcoding-ldd/08_ioctl/Module.symvers -n -T /home/dumble/git/mpcoding-ldd/08_ioctl/modules.order -i Module.symvers -e 

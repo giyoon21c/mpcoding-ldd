@@ -1,0 +1,50 @@
+==
+date:
+3.13.2026
+
+topic:
+08 - ioctl
+
+ref:
+https://youtu.be/EvgRY-rU4jQ?si=WQXNPclh7nO-gojc
+
+
+* how to use ioctl code
+
+dumble@raspberrypi:~/git/mpcoding-ldd/08_ioctl $ sudo insmod my_cdev.ko
+dumble@raspberrypi:~/git/mpcoding-ldd/08_ioctl $ sudo ./a.out
+Failed to open 0
+: Bad address
+dumble@raspberrypi:~/git/mpcoding-ldd/08_ioctl $ sudo ./a.out /dev/my_cdev0 "hello world"
+/dev/my_cdev0: file opend 0
+Written length: 11 
+Press enter to continue.
+Kernel said hello
+Value: 0xc0ffee copied from kernel
+Value: 0xb00b00 copied to kernel
+read: 11 bytes - hello world 
+Kernel private buffer cleared
+read: 0 bytes -  
+/dev/my_cdev0: file closed 0
+
+
+[ 3121.743484] my_cdev: Caracter device registerd, Major number: 236 Minor number: 0
+[ 3121.743500] my_cdev: Created device number under /sys/class/my_class
+[ 3121.743505] my_cdev: Created new device node /dev/my_cdev
+[ 3143.376041] my_cdev: my_open called, Major: 236 Minor: 0
+[ 3143.376070] my_cdev: Allocated 64 bytes for private data
+[ 3143.376338] my_cdev: write request=11, will copy=11
+[ 3143.376350] my_cdev: write done: copied=11
+[ 3145.606013] my_cdev: Hello from kernel via ioctl
+[ 3145.606047] my_cdev: value: 0xc0ffee copied to user
+[ 3145.606065] my_cdev: value: 0xb00b00 copied from user
+[ 3145.606078] my_cdev: read called: request=64, 
+[ 3145.606083] my_cdev: Read will copy=11 bytes
+[ 3145.606087] my_cdev: Read done: return=11
+[ 3145.606097] my_cdev: private data field cleared
+[ 3145.606105] my_cdev: read called: request=64, 
+[ 3145.606108] my_cdev: Read will copy=0 bytes
+[ 3145.606111] my_cdev: Read done: return=0
+[ 3145.606122] my_cdev: my_release called, freed 64 bytes and file is closed
+
+
