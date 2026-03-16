@@ -1,0 +1,1 @@
+savedcmd_/home/dumble/git/mpcoding-ldd/11_gpio_ctrl/request_free/Module.symvers :=  scripts/mod/modpost -M -m -a      -o /home/dumble/git/mpcoding-ldd/11_gpio_ctrl/request_free/Module.symvers -n -T /home/dumble/git/mpcoding-ldd/11_gpio_ctrl/request_free/modules.order -i Module.symvers -e 

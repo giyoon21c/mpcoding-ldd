@@ -1,0 +1,12 @@
+==
+date:
+3.15.2026
+
+topic:
+lec 13 - gpio interrupt handling
+
+ref:
+https://youtu.be/hVp2e-uTYMs?si=w_RTh2JcJglAAjNL
+
+https://github.com/madhawapolkotuwa/linux_driver_development_with_raspberrypi/blob/main/12_gpio_irq/irq/irq.c
+

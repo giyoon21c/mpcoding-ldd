@@ -1,5 +1,6 @@
 #include <linux/module.h>
 #include <linux/init.h>
+// this is updated gpio control
 #include <linux/gpio/consumer.h>
 
 MODULE_LICENSE("GPL");
@@ -13,6 +14,7 @@ static const char *device_name = "gpio_ctrl";
 
 #define GPIO_OFFSET 512
 
+// gpio descriptor inside kernel
 static struct gpio_desc *led, *button;
 
 static int led_gpio = (LED_GPIO + GPIO_OFFSET);

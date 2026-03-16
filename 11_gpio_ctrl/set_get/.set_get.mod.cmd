@@ -1,0 +1,1 @@
+savedcmd_/home/dumble/git/mpcoding-ldd/11_gpio_ctrl/set_get/set_get.mod := printf '%s\n'   set_get.o | awk '!x[$$0]++ { print("/home/dumble/git/mpcoding-ldd/11_gpio_ctrl/set_get/"$$0) }' > /home/dumble/git/mpcoding-ldd/11_gpio_ctrl/set_get/set_get.mod
