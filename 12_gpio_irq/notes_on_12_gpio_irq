@@ -35,11 +35,9 @@ typedef irqreturn_t (*irq_handler_t)(int, void*);
 /* GPIO ISR */
 static irqreturn_t button_isr(int irq, void *dev_id){
     pr_info("%s: Interrupt occoured on GPIO 20\n", device_name);
-    last_button_state = gpiod_get_value(button);
-    
+    gpiod_set_value(led, !gpiod_get_value(led));
     return IRQ_HANDLED;
 }
-
 
 dumble@raspberrypi:~/git/mpcoding-ldd/12_gpio_irq/irq $ sudo insmod irq.ko
 dumble@raspberrypi:~/git/mpcoding-ldd/12_gpio_irq/irq $ cat /proc/interrupts
@@ -148,4 +146,19 @@ IPI6:         0          0          0          0       CPU backtrace interrupts
 IPI7:         0          0          0          0       KGDB roundup interrupts
 Err:          0
 dumble@raspberrypi:~/git/mpcoding-ldd/12_gpio_irq/irq $ 
+
+
+==
+date:
+3.19.2026
+
+topic:
+taking care of contact debounce
+
+* bounce?
+
+What you are experiencing is contact bounce. When you press a mechanical button,
+the metal contacts literally "bounce" against each other for a few milliseconds,
+creating a series of rapid electrical spikes that the Raspberry Pi interprets as
+multiple separate interrupts.
 

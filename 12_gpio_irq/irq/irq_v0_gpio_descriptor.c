@@ -1,6 +1,7 @@
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/gpio/consumer.h>  // descriptor method
+//#include <linux/gpio.h>
 #include <linux/interrupt.h>
 #include <linux/timer_types.h> 
 
@@ -15,11 +16,12 @@ static const char *device_name = "gpio_ctrl";
 
 #define GPIO_OFFSET 512
 
+static struct gpio_desc *led, *button;
+
 static int led_gpio = (LED_GPIO + GPIO_OFFSET);
 static int button_gpio = (BUTTON_GPIO + GPIO_OFFSET);
 
-// using the gpio descriptor method
-static struct gpio_desc *led, *button;
+
 
 /* Variable contains iqr number */
 unsigned int irq_number;
@@ -27,16 +29,13 @@ unsigned int irq_number;
 /* debounsing */
 #define DEBOUNCE_DELAY 20 // 20ms
 
-static int last_button_state;
+//static int last_button_state;
 //static struct timer_list debounce_timer;
 
 /* GPIO ISR */
 static irqreturn_t button_isr(int irq, void *dev_id){
     pr_info("%s: Interrupt occoured on GPIO 20\n", device_name);
-    // toggle gpio led
-    //last_button_state = gpiod_get_value(button);
-    gpio_set_value(led_gpio, !gpio_get_value(led_gpio));
-        
+    gpiod_set_value(led, !gpiod_get_value(led));
     return IRQ_HANDLED;
 }
 
@@ -77,14 +76,10 @@ static int __init my_init(void) {
                          NULL);
     if(status){
       pr_err("%s: IRQ request failed\n", device_name);
-      gpio_free(led_gpio);
-      gpio_free(button_gpio);
       return -status;
     }
 
-    gpio_set_value(led_gpio, 1);
-
-    pr_info("%s: irq_number=%d \n", device_name, irq_number);
+    pr_info("%s: irq_number=%d\n", device_name, irq_number);
     pr_info("%s: GPIO request example loaded\n", device_name);
 
     return 0;
