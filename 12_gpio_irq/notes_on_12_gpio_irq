@@ -162,3 +162,134 @@ the metal contacts literally "bounce" against each other for a few milliseconds,
 creating a series of rapid electrical spikes that the Raspberry Pi interprets as
 multiple separate interrupts.
 
+
+==
+date:
+3.20.2026
+
+topic:
+continuing on deboucing
+
+ref:
+gem 
+
+
+----
+#include <linux/jiffies.h>
+
+static irqreturn_t button_isr(int irq, void *dev_id) {
+  static unsigned long last_interrupt_time = 0;
+  unsigned long current_time = jiffies;
+  unsigned long diff_ms = jiffies_to_msecs(current_time - last_interrupt_time);
+
+  // Verification Log
+  pr_info("Interrupt triggered! Time since last: %lu ms\n", diff_ms);
+
+  // Update the tracker
+  last_interrupt_time = current_time;
+
+  // Your existing logic
+  last_button_state = gpiod_get_value(button);
+  
+  return IRQ_HANDLED;
+}
+
+
+After you compile and load your driver, press the button once and run:
+dmesg | tail -n 20
+
+You will likely see something like this:
+
+Interrupt triggered! Time since last: 4500 ms (The actual press)
+Interrupt triggered! Time since last: 2 ms (Bounce!)
+Interrupt triggered! Time since last: 5 ms (Bounce!)
+
+In ADAS engineering, anything under 20–50ms is usually considered "noise" or "bounce" and should be ignored by your logic.
+
+
+* fix 
+
+static irqreturn_t button_isr(int irq, void *dev_id) {
+  static unsigned long last_interrupt_time = 0;
+  unsigned long current_time = jiffies;
+
+  // If the gap is less than 200ms, ignore this interrupt
+  if (current_time - last_interrupt_time < msecs_to_jiffies(200)) {
+    return IRQ_HANDLED; 
+  }
+
+  last_interrupt_time = current_time;
+  
+  // Logic only executes if the button was "stable"
+  pr_info("Valid button press detected.\n");
+  
+  return IRQ_HANDLED;
+}
+
+
+* fix using debouce timer?
+
+1. How the Logic Works
+The Interrupt: The button is pressed. The button_isr triggers immediately.
+
+The Action: Instead of reading the GPIO, the ISR simply "restarts" a timer
+(e.g., 50ms).
+
+The Wait: If the button "bounces" again at 5ms, 10ms, or 20ms, the ISR keeps
+resetting that timer back to 50ms.
+
+The Execution: Once the button stops bouncing and 50ms of "silence" passes, the
+Timer Function finally runs. This is where you actually read the GPIO state.
+
+- impl 
+#include <linux/timer.h>
+#include <linux/jiffies.h>
+
+static struct timer_list debounce_timer;
+
+// 1. This function runs AFTER the bouncing stops
+void debounce_timer_callback(struct timer_list *t) {
+  int state = gpiod_get_value(button);
+  pr_info("Button state stabilized at: %d\n", state);
+  
+  // Here is where you would trigger your LED or ADAS logic
+}
+
+// 2. The ISR now just manages the timer
+static irqreturn_t button_isr(int irq, void *dev_id) {
+  // Mod_timer starts the timer OR restarts it if it's already running
+  // 50ms is usually plenty for a standard tactile button
+  mod_timer(&debounce_timer, jiffies + msecs_to_jiffies(50));
+  
+  return IRQ_HANDLED;
+}
+
+
+
+- setting it up in module_init
+
+static int __init my_driver_init(void) {
+  // ... other GPIO setup ...
+
+  // Initialize the timer
+  timer_setup(&debounce_timer, debounce_timer_callback, 0);
+
+  // Request the IRQ as usual
+  // ...
+  
+  return 0;
+}
+
+
+- cleaning up in module_exit 
+
+static void __exit my_driver_exit(void) {
+  // Delete the timer before freeing the IRQ
+  del_timer_sync(&debounce_timer);
+  
+  free_irq(irq_number, NULL);
+  // ...
+}
+
+
+
