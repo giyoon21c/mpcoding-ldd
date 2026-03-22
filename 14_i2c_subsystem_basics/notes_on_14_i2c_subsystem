@@ -1,0 +1,247 @@
+==
+date:
+3.22.2026
+
+topic:
+14 i2c subsystem
+
+ref:
+https://youtu.be/r5IYB4xjk2o?si=R0fHHEHjp_CHDlOF
+
+
+* i2c introduction
+
+developed by Philips
+
+
+* i2c basics
+
+- 2 wires 
+
+. SDA: dataline
+open drain and needs pull-up resistors
+
+. SCLK: clockline
+
+the master device generates the clock on the SCL line and 
+initiates either a read or write operation.
+
+after every 8 bits of data, the receiver sends an ACK or
+NACK to indicate whether the transfer was successful.
+
+
+
+* linux i2c subsystem
+
+                I2C
+                 |
+                 |
+       +---------+------------+
+       |                      |
+       |                      |
+    DEVICE                  BUSES
+       |                      |       
+ +-----+-----+           +----+------+         
+ |           |           |           |
+ |           |           |           | 
+DRIVER      CLIENT      ALGORITHMS ADAPTER
+
+
+- Bus side
+adaptor: represents the i2c controller hardware
+algorith: defines how transfers are performed
+
+
+- device side
+client: represents a physical i2c slave device
+driver: contains device-specific logi
+
+
+* listing i2c devices in user space (/dev)
+
+ls /dev/
+
+dumble@raspberrypi:~/git/mpcoding-ldd $ ls -lga /dev/i2c*
+crw-rw---- 1 i2c 89,  1 Mar 21 08:51 /dev/i2c-1
+crw-rw---- 1 i2c 89, 20 Mar 21 08:51 /dev/i2c-20
+crw-rw---- 1 i2c 89, 21 Mar 21 08:51 /dev/i2c-21
+dumble@raspberrypi:~/git/mpcoding-ldd $ 
+
+
+* sudo apt-get install i2c-tools
+
+* $ i2cdetect -l
+
+dumble@raspberrypi:~/git/mpcoding-ldd $ i2cdetect -l
+i2c-1   i2c             bcm2835 (i2c@7e804000)                  I2C adapter
+i2c-20  i2c             fef04500.i2c                            I2C adapter
+i2c-21  i2c             fef09500.i2c                            I2C adapter
+
+
+* i2cdetect -y 1
+
+dumble@raspberrypi:~/git/mpcoding-ldd $ i2cdetect -y 1
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:                         -- -- -- -- -- -- -- -- 
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+70: -- -- -- -- -- -- -- --  
+
+
+* bmp180 sensor
+
+pin1: vcc
+pin2: gnd
+pin3: scl
+pin4: sda
+
+
+* device tree concept
+
+dumble@raspberrypi:~/git/mpcoding-ldd $ dtc -I fs -O dts -s /sys/firmware/devicetree/base > tmp_dt.dts
+<stdout>: Warning (unit_address_vs_reg): /scb: node has a reg or ranges property, but no unit name
+<stdout>: Warning (unit_address_vs_reg): /soc: node has a reg or ranges property, but no unit name
+<stdout>: Warning (unit_address_vs_reg): /soc/gpiomem: node has a reg or ranges property, but no unit name
+<stdout>: Warning (unit_address_vs_reg): /soc/gpio@7e200000/w1_pins@0: node has a unit name, but no reg or ranges property
+<stdout>: Warning (unit_address_vs_reg): /soc/nvmem/nvmem_otp: node has a reg or ranges property, but no unit name
+<stdout>: Warning (unit_address_vs_reg): /soc/nvmem/nvmem_priv: node has a reg or ranges property, but no unit name
+<stdout>: Warning (unit_address_vs_reg): /soc/nvmem/nvmem_cust: node has a reg or ranges property, but no unit name
+<stdout>: Warning (unit_address_vs_reg): /soc/axiperf: node has a reg or ranges property, but no unit name
+<stdout>: Warning (unit_address_vs_reg): /onewire@0: node has a unit name, but no reg or ranges property
+<stdout>: Warning (unit_address_vs_reg): /emmc2bus: node has a reg or ranges property, but no unit name
+<stdout>: Warning (unit_address_vs_reg): /axi/vc_mem: node has a reg or ranges property, but no unit name
+<stdout>: Warning (unit_address_vs_reg): /v3dbus: node has a reg or ranges property, but no unit name
+<stdout>: Warning (simple_bus_reg): /scb/codec@7eb10000: simple-bus unit address format error, expected "7eb00000"
+<stdout>: Warning (simple_bus_reg): /soc/gpiomem: simple-bus unit address format error, expected "7e200000"
+<stdout>: Warning (simple_bus_reg): /soc/power: missing or empty reg/ranges property
+<stdout>: Warning (simple_bus_reg): /soc/fb: missing or empty reg/ranges property
+<stdout>: Warning (simple_bus_reg): /soc/i2c0mux: missing or empty reg/ranges property
+<stdout>: Warning (simple_bus_reg): /soc/nvmem/nvmem_otp: simple-bus unit address format error, expected "0"
+<stdout>: Warning (simple_bus_reg): /soc/nvmem/nvmem_priv: simple-bus unit address format error, expected "3"
+<stdout>: Warning (simple_bus_reg): /soc/nvmem/nvmem_cust: simple-bus unit address format error, expected "1"
+<stdout>: Warning (simple_bus_reg): /soc/sound: missing or empty reg/ranges property
+<stdout>: Warning (simple_bus_reg): /soc/firmware: missing or empty reg/ranges property
+<stdout>: Warning (simple_bus_reg): /soc/axiperf: simple-bus unit address format error, expected "7e009800"
+<stdout>: Warning (simple_bus_reg): /clocks/clk-osc: missing or empty reg/ranges property
+<stdout>: Warning (simple_bus_reg): /clocks/clk-usb: missing or empty reg/ranges property
+<stdout>: Warning (simple_bus_reg): /v3dbus/v3d@7ec04000: simple-bus unit address format error, expected "7ec00000"
+<stdout>: Warning (avoid_default_addr_size): /axi/vc_mem: Relying on default #address-cells value
+<stdout>: Warning (avoid_default_addr_size): /axi/vc_mem: Relying on default #size-cells value
+<stdout>: Warning (avoid_unnecessary_addr_size): Failed prerequisite 'avoid_default_addr_size'
+<stdout>: Warning (unique_unit_address): Failed prerequisite 'avoid_default_addr_size'
+<stdout>: Warning (clocks_property): /scb/codec@7eb10000:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/watchdog@7e100000:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/watchdog@7e100000:clocks: cell 2 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/watchdog@7e100000:clocks: cell 4 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/watchdog@7e100000:clocks: cell 6 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/spi@7e204600:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/vec@7ec13000:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/i2c@7e804000:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/hdmi@7ef05700:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/hdmi@7ef05700:clocks: cell 2 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/hdmi@7ef05700:clocks: cell 4 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/hdmi@7ef05700:clocks: cell 6 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/aux@7e215000:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/pwm@7e20c800:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/csi@7e801000:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/csi@7e801000:clocks: cell 2 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/mmcnr@7e300000:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/i2c@7e205a00:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/clock@7ef00000:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/i2c@7e205800:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/serial@7e201a00:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/serial@7e201a00:clocks: cell 2 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/mmc@7e202000:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/serial@7e201800:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/serial@7e201800:clocks: cell 2 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/spi@7e204a00:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/hvs@7e400000:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/spi@7e204800:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/csi@7e800000:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/csi@7e800000:clocks: cell 2 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/pwm@7e20c000:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/spi@7e215080:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/serial@7e201400:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/serial@7e201400:clocks: cell 2 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/serial@7e215040:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/i2c@7e205c00:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/smi@7e600000:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/cprman@7e101000:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/cprman@7e101000:clocks: cell 1 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/cprman@7e101000:clocks: cell 3 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/cprman@7e101000:clocks: cell 5 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/cprman@7e101000:clocks: cell 7 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/cprman@7e101000:clocks: cell 9 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/cprman@7e101000:clocks: cell 11 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/i2c@7e205000:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/spi@7e2150c0:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/usb@7e980000:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/dsi@7e209000:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/dsi@7e209000:clocks: cell 2 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/dsi@7e209000:clocks: cell 4 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/i2s@7e203000:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/spi@7e204c00:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/serial@7e201000:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/serial@7e201000:clocks: cell 2 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/hdmi@7ef00700:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/hdmi@7ef00700:clocks: cell 2 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/hdmi@7ef00700:clocks: cell 4 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/hdmi@7ef00700:clocks: cell 6 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/mmc@7e300000:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/i2c@7e205600:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/spi@7e204000:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/dpi@7e208000:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/dpi@7e208000:clocks: cell 2 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/serial@7e201600:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/serial@7e201600:clocks: cell 2 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/dsi@7e700000:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/dsi@7e700000:clocks: cell 2 is not a phandle reference
+<stdout>: Warning (clocks_property): /soc/dsi@7e700000:clocks: cell 4 is not a phandle reference
+<stdout>: Warning (clocks_property): /emmc2bus/mmc@7e340000:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (clocks_property): /__symbols__:clocks: property size (21) is invalid, expected multiple of 4
+<stdout>: Warning (clocks_property): /v3dbus/v3d@7ec04000:clocks: cell 0 is not a phandle reference
+<stdout>: Warning (dmas_property): /soc/hdmi@7ef05700:dmas: cell 0 is not a phandle reference
+<stdout>: Warning (dmas_property): /soc/mmcnr@7e300000:dmas: cell 0 is not a phandle reference
+<stdout>: Warning (dmas_property): /soc/mmc@7e202000:dmas: cell 0 is not a phandle reference
+<stdout>: Warning (dmas_property): /soc/smi@7e600000:dmas: cell 0 is not a phandle reference
+<stdout>: Warning (dmas_property): /soc/i2s@7e203000:dmas: cell 0 is not a phandle reference
+<stdout>: Warning (dmas_property): /soc/i2s@7e203000:dmas: cell 2 is not a phandle reference
+<stdout>: Warning (dmas_property): /soc/hdmi@7ef00700:dmas: cell 0 is not a phandle reference
+<stdout>: Warning (dmas_property): /soc/mmc@7e300000:dmas: cell 0 is not a phandle reference
+<stdout>: Warning (dmas_property): /soc/spi@7e204000:dmas: cell 0 is not a phandle reference
+<stdout>: Warning (dmas_property): /soc/spi@7e204000:dmas: cell 2 is not a phandle reference
+<stdout>: Warning (mboxes_property): /soc/firmware:mboxes: cell 0 is not a phandle reference
+<stdout>: Warning (msi_parent_property): /scb/pcie@7d500000:msi-parent: cell 0 is not a phandle reference
+<stdout>: Warning (phys_property): /soc/usb@7e980000:phys: cell 0 is not a phandle reference
+<stdout>: Warning (power_domains_property): /scb/xhci@7e9c0000:power-domains: cell 0 is not a phandle reference
+<stdout>: Warning (power_domains_property): /soc/vec@7ec13000:power-domains: cell 0 is not a phandle reference
+<stdout>: Warning (power_domains_property): /soc/csi@7e801000:power-domains: cell 0 is not a phandle reference
+<stdout>: Warning (power_domains_property): /soc/csi@7e800000:power-domains: cell 0 is not a phandle reference
+<stdout>: Warning (power_domains_property): /soc/usb@7e980000:power-domains: cell 0 is not a phandle reference
+<stdout>: Warning (power_domains_property): /soc/dsi@7e209000:power-domains: cell 0 is not a phandle reference
+<stdout>: Warning (power_domains_property): /soc/dsi@7e700000:power-domains: cell 0 is not a phandle reference
+<stdout>: Warning (power_domains_property): /v3dbus/v3d@7ec04000:power-domains: cell 0 is not a phandle reference
+<stdout>: Warning (resets_property): /scb/pcie@7d500000/pci@0,0/usb@0,0:resets: cell 0 is not a phandle reference
+<stdout>: Warning (resets_property): /soc/hdmi@7ef05700:resets: cell 0 is not a phandle reference
+<stdout>: Warning (resets_property): /soc/hdmi@7ef00700:resets: cell 0 is not a phandle reference
+<stdout>: Warning (resets_property): /v3dbus/v3d@7ec04000:resets: cell 0 is not a phandle reference
+<stdout>: Warning (thermal_sensors_property): /thermal-zones/cpu-thermal:thermal-sensors: cell 0 is not a phandle reference
+<stdout>: Warning (gpios_property): /regulator-sd-vcc:gpio: cell 0 is not a phandle reference
+<stdout>: Warning (gpios_property): /soc/serial@7e215040/bluetooth:shutdown-gpios: cell 0 is not a phandle reference
+<stdout>: Warning (gpios_property): /soc/serial@7e201000/bluetooth:shutdown-gpios: cell 0 is not a phandle reference
+<stdout>: Warning (gpios_property): /soc/spi@7e204000:cs-gpios: cell 0 is not a phandle reference
+<stdout>: Warning (gpios_property): /soc/spi@7e204000:cs-gpios: cell 3 is not a phandle reference
+<stdout>: Warning (gpios_property): /leds/led-act:gpios: cell 0 is not a phandle reference
+<stdout>: Warning (gpios_property): /leds/led-pwr:gpios: cell 0 is not a phandle reference
+<stdout>: Warning (gpios_property): /onewire@0:gpios: cell 0 is not a phandle reference
+<stdout>: Warning (gpios_property): /regulator-cam1:gpio: cell 0 is not a phandle reference
+<stdout>: Warning (gpios_property): /aliases:gpio: property size (19) is invalid, expected multiple of 4
+<stdout>: Warning (gpios_property): /__symbols__:gpio: property size (19) is invalid, expected multiple of 4
+<stdout>: Warning (gpios_property): /regulator-sd-io-1v8:gpios: cell 0 is not a phandle reference
+dumble@raspberrypi:~/git/mpcoding-ldd $ 
+
+

@@ -1,0 +1,52 @@
+==
+date:
+3.22.2026
+
+topic:
+15 bmp180 i2c sensor
+
+ref:
+
+* topology
+
+bmp180
+
+VIN
+SDA
+SCL
+GND
+
+
+* after the connection
+
+dumble@raspberrypi:~/git/mpcoding-ldd $ i2cdetect -y 1
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:                         -- -- -- -- -- -- -- -- 
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+70: -- -- -- -- -- -- -- 77      
+
+
+
+dumble@raspberrypi:~/git/mpcoding-ldd/15_bmp180_i2c_sensor $ ls /sys/bus/i2c/devices
+i2c-1  i2c-20  i2c-21
+
+
+dumble@raspberrypi:~/git/mpcoding-ldd/15_bmp180_i2c_sensor $ ls /sys/bus/i2c/drivers
+dummy  stmpe-i2c
+
+
+dumble@raspberrypi:~/git/mpcoding-ldd/15_bmp180_i2c_sensor $ sudo insmod bmp180_i2c_driver.ko 
+
+dumble@raspberrypi:~/git/mpcoding-ldd/15_bmp180_i2c_sensor $ ls /sys/bus/i2c/devices
+1-0077  i2c-1  i2c-20  i2c-21
+
+dumble@raspberrypi:~/git/mpcoding-ldd/15_bmp180_i2c_sensor $ ls /sys/bus/i2c/drivers
+bmp180-i2c-driver  dummy  stmpe-i2c
+
+
+

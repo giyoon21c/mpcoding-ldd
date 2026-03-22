@@ -1,6 +1,6 @@
 #include <linux/module.h>
 #include <linux/init.h>
-#include <linux/i2c.h>
+#include <linux/i2c.h> // header
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("MP Coding LDD");
@@ -21,6 +21,7 @@ static struct my_data b = {
     .name = "Device B",
     .i = 123, 
 };
+
 
 static struct i2c_device_id my_ids[] = {
     {"bmp180-a", (kernel_ulong_t)&a},
