@@ -241,7 +241,9 @@ resetting that timer back to 50ms.
 The Execution: Once the button stops bouncing and 50ms of "silence" passes, the
 Timer Function finally runs. This is where you actually read the GPIO state.
 
+
 - impl 
+
 #include <linux/timer.h>
 #include <linux/jiffies.h>
 
@@ -264,8 +266,6 @@ static irqreturn_t button_isr(int irq, void *dev_id) {
   return IRQ_HANDLED;
 }
 
-
-
 - setting it up in module_init
 
 static int __init my_driver_init(void) {
@@ -279,7 +279,6 @@ static int __init my_driver_init(void) {
   
   return 0;
 }
-
 
 - cleaning up in module_exit 
 

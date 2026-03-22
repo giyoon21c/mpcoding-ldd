@@ -4,8 +4,6 @@
 //#include <linux/gpio.h>
 #include <linux/interrupt.h>
 #include <linux/timer_types.h> 
-
-#include <linux/timer.h>
 #include <linux/jiffies.h>  // adding jiffies
 
 MODULE_LICENSE("GPL");
@@ -31,26 +29,22 @@ unsigned int irq_number;
 #define DEBOUNCE_DELAY 20 // 20ms
 
 //static int last_button_state;
-static struct timer_list debounce_timer;
+//static struct timer_list debounce_timer;
 
-
-// 1. this function runs AFTER debounce_timer
-static void debounce_timer_callback(struct timer_list *t) {
-  int state = gpiod_get_value(button);
-  pr_info("Button state stablized: %d\n", state);
-
-  // here is where you would trigger your LED 
-  gpiod_set_value(led, !gpiod_get_value(led));
-
-}
-
-
-// 2. the ISR now just manages the timer
+/* GPIO ISR */
 static irqreturn_t button_isr(int irq, void *dev_id){
-  pr_info("interrupt triggerd!");
-  // start the timer
-  // 50ms is usually plenty for a standcard tactile button
-  mod_timer(&debounce_timer, jiffies + msecs_to_jiffies(50));
+  static unsigned long last_interrupt_time = 0;
+  unsigned long current_time = jiffies;
+  unsigned long diff_ms = jiffies_to_msecs(current_time - last_interrupt_time);
+
+  pr_info("interrupt triggerd! Time since last: %lu ms\n", diff_ms);
+  if (last_interrupt_time != 0 && diff_ms < 20) {
+    pr_alert("DEBOUCE TRIGGERD: noise detected at %lu ms!\n", diff_ms);
+    return IRQ_HANDLED;
+  }
+  last_interrupt_time = current_time;
+  pr_info("%s: Interrupt occoured on GPIO 20\n", device_name);
+  gpiod_set_value(led, !gpiod_get_value(led));
   return IRQ_HANDLED;
 }
 
@@ -80,10 +74,7 @@ static int __init my_init(void) {
       pr_err("%s: Failed to set gpio 21 button direction\n", device_name);
       return -status;
     }
-
-    // 3. Initialize the timer
-    timer_setup(&debounce_timer, debounce_timer_callback, 0);
-
+    
     // gpio descriptor to irq
     irq_number = gpiod_to_irq(button);
 
@@ -100,15 +91,11 @@ static int __init my_init(void) {
     pr_info("%s: irq_number=%d\n", device_name, irq_number);
     pr_info("%s: GPIO request example loaded\n", device_name);
 
-
     return 0;
 }
 
 static void __exit my_exit(void){
     gpiod_set_value(led, 0);
-
-    // 4. clean up in the module_exit
-    del_timer_sync(&debounce_timer);
 
     free_irq(irq_number, NULL);
     pr_info("%s: Goodbye Kernel\n", device_name);

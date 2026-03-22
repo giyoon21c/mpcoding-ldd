@@ -44,7 +44,6 @@ static void debounce_timer_callback(struct timer_list *t) {
 
 }
 
-
 // 2. the ISR now just manages the timer
 static irqreturn_t button_isr(int irq, void *dev_id){
   pr_info("interrupt triggerd!");
