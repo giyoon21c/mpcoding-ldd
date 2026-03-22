@@ -1,0 +1,25 @@
+==
+date:
+3.22.2026
+
+topic:
+13 high resolution timer
+
+ref:
+
+
+* normal timers (low-resolution)
+
+jiffies based
+precision: about 4 ms
+
+* high resolution timers (hrtimers)
+
+nanosecond clock
+red black tree
+precision: nanosecond
+
+
+
+
+

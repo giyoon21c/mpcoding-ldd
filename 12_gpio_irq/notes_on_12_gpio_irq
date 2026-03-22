@@ -395,3 +395,28 @@ timer callback we just fixed?** This would make the detection even more robust
 against mechanical noise.
 
 
+
+* IRQ top-half and bottom-half workqueues
+
++++hardware device interrupt signal+++
+
+- Top half (hard IRQ)
+acknowledge interrupt (fast)
+minimal data copy and status read
+schedule bottom half (flag/queue)
+
+==> schedule bottom half
+
+- Bottom half (deferred work)
+tasklets (high priority)
+softirqs (network / block IO)
+workqueues (process context)
+
+execute deferred actions and clean up
+
+==> return to user process
+
+
+
+
+

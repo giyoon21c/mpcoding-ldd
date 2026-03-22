@@ -10,6 +10,8 @@ MODULE_DESCRIPTION("A Simple High Resolution Timers Example");
 static u64 timestams[MAX_SAMPLE];
 static int index;
 
+
+// global hrtimer structure
 static struct hrtimer my_hrtimer;
 u64 start_time;
 
@@ -26,7 +28,11 @@ static enum hrtimer_restart	hrtimer_callback(struct hrtimer *timer){
 }
 
 static int __init my_init(void){
-    hrtimer_init(&my_hrtimer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
+    // high resolution timer init
+    hrtimer_init(&my_hrtimer, 
+                 CLOCK_MONOTONIC, 
+                 HRTIMER_MODE_REL);
+
     my_hrtimer.function = &hrtimer_callback;
 
     start_time = ktime_get_ns();
