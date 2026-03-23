@@ -49,4 +49,152 @@ dumble@raspberrypi:~/git/mpcoding-ldd/15_bmp180_i2c_sensor $ ls /sys/bus/i2c/dri
 bmp180-i2c-driver  dummy  stmpe-i2c
 
 
+==
+date:
+3.23.2026
+
+topic:
+15 bmp180 i2c sensor
+
+ref:
+gem
+
+
+* linux i2c stack (software layer)
+
+Layer     Name                Responsibility
+=====     ==========          ======================== 
+Top       I2C Device Driver   "The ""Waiter."" 
+                              Knows what the specific sensor (like an MPU6050) needs and asks the bus for it."
+Middle    I2C Core            "The ""Kitchen."" 
+                              A generic layer that handles the passing of messages between drivers and hardware."
+Bottom    I2C Adapter (Bus)   "The ""Chef."" 
+                              The actual hardware on your Raspberry Pi (Broadcom chip) that wiggles the SDA/SCL lines."
+
+                              
+* Anatomy of an I2C Transaction
+Every conversation on the bus follows a strict protocol:
+
+START Condition: Master pulls SDA low while SCL is high.
+
+Address + R/W Bit: "Hey, Device 0x68, I want to WRITE to you."
+
+ACK (Acknowledge): The slave pulls SDA low to say, "I'm here!"
+
+Data Transfer: Sending or receiving 8 bits at a time.
+
+STOP Condition: Master releases the lines.
+
+
+* checking (prep) 
+
+dumble@raspberrypi:~/git/mpcoding-ldd/15_bmp180_i2c_sensor $ 
+ls /dev/i2c-1
+/dev/i2c-1
+
+
+* bmp180 hardware profile
+
+Before writing code, we must understand how the Linux Kernel sees this device:
+
+Default I2C Address: 0x77.
+
+The "Chip ID" Register: 0xD0. If you read this register, it should always return
+0x55. This is the first test your driver should perform to verify it's talking
+to the right hardware.
+
+Control Register: 0xF4. You write to this to tell the chip to start a
+temperature or pressure measurement.
+
+
+[DETOUR] my own learning
+
+#include <linux/module.h>
+#include <linux/i2c.h>
+#include <linux/kernel.h>
+
+#define DRIVER_NAME "bmp180_driver"
+#define BMP180_CHIP_ID_REG 0xD0
+#define BMP180_EXPECTED_ID 0x55
+
+// The 'Probe' function: Called when the device and driver match
+static int bmp180_probe(struct i2c_client *client, const struct i2c_device_id *id) {
+  s32 ret;
+
+  pr_info("%s: Probing BMP180 at address 0x%x\n", DRIVER_NAME, client->addr);
+
+  // Read the Chip ID to verify hardware
+  ret = i2c_smbus_read_byte_data(client, BMP180_CHIP_ID_REG);
+  
+  if (ret < 0) {
+    pr_err("%s: Failed to read from I2C bus\n", DRIVER_NAME);
+    return ret;
+  }
+
+  if (ret != BMP180_EXPECTED_ID) {
+    pr_err("%s: Wrong Chip ID! Expected 0x55, got 0x%x\n", DRIVER_NAME, ret);
+    return -ENODEV;
+  }
+
+  pr_info("%s: Successfully identified BMP180! Chip ID: 0x%x\n", DRIVER_NAME, ret);
+  return 0;
+}
+
+// The 'Remove' function: Called when the module is unloaded
+static void bmp180_remove(struct i2c_client *client) {
+  pr_info("%s: Removing driver for device at 0x%x\n", DRIVER_NAME, client->addr);
+}
+
+// Device ID table for the I2C subsystem
+static const struct i2c_device_id bmp180_id[] = {
+  { "bmp180", 0 },
+  { }
+};
+MODULE_DEVICE_TABLE(i2c, bmp180_id);
+
+// Driver structure
+static struct i2c_driver bmp180_driver = {
+  .driver = {
+    .name = DRIVER_NAME,
+    .owner = THIS_MODULE,
+  },
+  .probe = bmp180_probe,
+  .remove = bmp180_remove,
+  .id_table = bmp180_id,
+};
+
+// This macro replaces module_init and module_exit for I2C drivers
+module_i2c_driver(bmp180_driver);
+
+MODULE_AUTHOR("Dumble");
+MODULE_DESCRIPTION("BMP180 I2C Kernel Driver");
+MODULE_LICENSE("GPL");
+
+
+--
+obj-m += bmp180_driver.o
+
+all:
+	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
+
+clean:
+	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
+
+
+--
+
+Because I2C devices aren't "Plug-and-Play" (the kernel doesn't know what is on the pins until you tell it), you need to manually instantiate the device after loading the module.
+
+1. Compile:
+make
+
+2. Load the Module:
+sudo insmod bmp180_driver.ko
+
+3. Tell the Kernel about your Sensor:
+(Assuming your BMP180 is on I2C bus 1)
+echo bmp180 0x77 | sudo tee /sys/class/i2c-adapter/i2c-1/new_device
+
+4. Verify in Logs:
+dmesg | tail
 
