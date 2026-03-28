@@ -22,12 +22,13 @@ static struct my_data b = {
     .i = 123, 
 };
 
-
+// two sample device profiles
 static struct i2c_device_id my_ids[] = {
     {"bmp180-a", (kernel_ulong_t)&a},
     {"bmp180-b", (kernel_ulong_t)&b},
     { /* essential */ },
 };
+// export the id table to user space
 MODULE_DEVICE_TABLE(i2c, my_ids);
 
 /*
@@ -42,7 +43,8 @@ static int my_probe(struct i2c_client *client){
 
     struct my_data *data = (struct my_data*)id->driver_data;
     pr_info("bmp180_i2c_driver private name-%s i-%d\n", data->name, data->i);
-    
+
+    // will see 55 for the chip id of bmp180
     pr_info("bmp180_i2c_driver ID:0x%x\n", i2c_smbus_read_byte_data(client, 0xD0));
 
     return 0;
@@ -75,7 +77,6 @@ static struct i2c_driver my_driver = {
     .driver = {
         .name = "bmp180-i2c-driver",
     }
-
 };
 
 static int __init my_init(void){
